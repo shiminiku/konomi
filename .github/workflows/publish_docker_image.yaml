@@ -6,7 +6,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: KonomiTV
+  IMAGE_NAME: ${{ github.repository_owner }}/KonomiTV
 
 jobs:
   build-and-push-image:
@@ -15,6 +15,11 @@ jobs:
       contents: read
       packages: write
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          repository: 'tsukumijima/KonomiTV'
+
       - name: Checkout Repository
         uses: actions/checkout@v4
 
