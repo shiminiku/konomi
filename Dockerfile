@@ -20,7 +20,7 @@ WORKDIR /
 # RUN aria2c -x10 https://github.com/tsukumijima/KonomiTV/releases/download/v0.12.0/thirdparty-linux.tar.xz
 # RUN tar xvf thirdparty-linux.tar.xz
 ## 開発版 (0.xx.x-dev) 用
-RUN aria2c -x10 https://nightly.link/shiminiku/konomi/actions/runs/20882539476/thirdparty-linux.tar.xz.zip
+RUN aria2c -x10 https://nightly.link/shiminiku/konomi/actions/runs/20882889079/thirdparty-linux.tar.xz.zip
 RUN unzip thirdparty-linux.tar.xz.zip && tar xvf thirdparty-linux.tar.xz
 # --------------------------------------------------------------------------------------------------------------
 # クライアントをビルドするステージ
