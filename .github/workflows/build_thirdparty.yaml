@@ -158,7 +158,6 @@ jobs:
       - name: Download and Deploy Encoder Archives (for x64)
         if: matrix.arch == 'amd64'
         run: |
-
           # p7zip-full と patchelf のインストール
           ## patchelf は ELF バイナリに埋め込まれている rpath (動的ライブラリの検索パス) を変更するツールで、
           ## QSV/NV/VCEEncC に rpath を追加するために使う
@@ -182,12 +181,23 @@ jobs:
           chmod a+x thirdparty/FFmpeg/ffprobe.elf
           patchelf --set-rpath '$ORIGIN:$ORIGIN/../lib:$ORIGIN/../Library' thirdparty/FFmpeg/ffprobe.elf
 
+          # QSVEncC for startup check hack
+          mkdir thirdparty/QSVEncC/
+          touch thirdparty/QSVEncC/QSVEncC.elf
+
+          # NVEncC for startup check hack
+          mkdir thirdparty/NVEncC/
+          touch thirdparty/NVEncC/NVEncC.elf
+          
+          # VCEEncC for startup check hack
+          mkdir thirdparty/VCEEncC/
+          touch thirdparty/VCEEncC/VCEEncC.elf
+          
       # FFmpeg・rkmppenc のアーカイブのダウンロードと配置
       # ドライバさえ入っていればスタンドアローンで実行できるように構成を工夫している
       - name: Download and Deploy Encoder Archives (for arm64)
         if: matrix.arch == 'arm64'
         run: |
-
           # p7zip-full と patchelf のインストール
           ## patchelf は ELF バイナリに埋め込まれている rpath (動的ライブラリの検索パス) を変更するツールで、
           ## rkmppenc に rpath を追加するために使う
@@ -211,10 +221,13 @@ jobs:
           chmod a+x thirdparty/FFmpeg/ffprobe.elf
           patchelf --set-rpath '$ORIGIN:$ORIGIN/../lib:$ORIGIN/../Library' thirdparty/FFmpeg/ffprobe.elf
 
+          # rkmppenc for startup check hack
+          mkdir thirdparty/rkmppenc/
+          touch thirdparty/rkmppenc/rkmppenc.elf
+
       # Python Standalone Builds のダウンロードと poetry のインストール
       - name: Install Python Standalone Builds & pip & poetry
         run: |
-
           # Python 本体のダウンロード
           curl -L -o python.tar.gz https://github.com/indygreg/python-build-standalone/releases/download/${{ env.PYTHON_TAG }}/cpython-${{ env.PYTHON_VERSION }}+${{ env.PYTHON_TAG }}-${{ matrix.python_arch_name }}-unknown-linux-gnu-install_only_stripped.tar.gz
           tar xvf python.tar.gz
