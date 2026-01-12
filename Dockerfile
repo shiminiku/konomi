@@ -17,11 +17,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends aria2 ca-certif
 ## サードパーティーライブラリは変更が少ないので、先にダウンロード処理を実行してビルドキャッシュを効かせる
 WORKDIR /
 ## リリース版用
-# RUN aria2c -x10 https://github.com/tsukumijima/KonomiTV/releases/download/v0.12.0/thirdparty-linux.tar.xz
-# RUN tar xvf thirdparty-linux.tar.xz
-## 開発版 (0.xx.x-dev) 用
-RUN aria2c -x10 https://nightly.link/shiminiku/konomi/actions/runs/20882889079/thirdparty-linux.tar.xz.zip
-RUN unzip thirdparty-linux.tar.xz.zip && tar xvf thirdparty-linux.tar.xz
+RUN aria2c -x10 https://github.com/tsukumijima/KonomiTV/releases/download/v0.12.0/thirdparty-linux.tar.xz
+RUN tar xvf thirdparty-linux.tar.xz
+## 開発版 (0.x.x-dev) 用
+# RUN aria2c -x10 https://nightly.link/tsukumijima/KonomiTV/actions/runs/13269769043/thirdparty-linux.tar.xz.zip
+# RUN unzip thirdparty-linux.tar.xz.zip && tar xvf thirdparty-linux.tar.xz
+
 # --------------------------------------------------------------------------------------------------------------
 # クライアントをビルドするステージ
 # クライアントのビルド成果物 (dist) は Git に含まれているが、万が一ビルドし忘れたりや開発ブランチでの利便性を考慮してビルドしておく
@@ -46,10 +47,7 @@ RUN yarn build
 # メインのステージ
 # ここで作成された実行時イメージが docker compose up -d で起動される
 # --------------------------------------------------------------------------------------------------------------
-# Ubuntu 22.04 LTS (with CUDA) をベースイメージとして利用
-## NVEncC の動作には CUDA ライブラリが必要なため、CUDA 付きのイメージを使う
-## RTX 5090 (Blackwell) 世代をサポートする最低バージョンである CUDA 12.8.0 を指定している
-## cuda:x.x.x-runtime 系イメージだと NVEncC で使わない余計なライブラリが付属して重いので、base イメージを使う
+# Ubuntu 22.04 LTS をベースイメージとして利用
 FROM ubuntu:22.04
 
 # タイムゾーンを東京に設定
@@ -57,29 +55,6 @@ ENV TZ=Asia/Tokyo
 
 # apt-get に対話的に設定を確認されないための設定
 ENV DEBIAN_FRONTEND=noninteractive
-
-# サードパーティーライブラリの依存パッケージをインストール
-## libfontconfig1, libfreetype6, libfribidi0: フォント関連のライブラリ (なぜ必要だったか忘れたが多分ないと動かない)
-## Zendriver: Twitter GraphQL API を叩くために必要な Google Chrome とサイズ小さめの日本語フォントをインストールする
-RUN apt-get update && \
-    # リポジトリ追加に必要な最低限のパッケージをインストール
-    apt-get install -y --no-install-recommends ca-certificates curl git gpg tzdata && \
-    # Google Chrome リポジトリ
-    curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --yes --dearmor --output /usr/share/keyrings/google-chrome-keyring.gpg && \
-    echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome-keyring.gpg] https://dl.google.com/linux/chrome/deb/ stable main' > /etc/apt/sources.list.d/google-chrome.list && \
-    # リポジトリを更新し、この時点で利用可能なパッケージをアップグレード
-    apt-get update && apt-get upgrade -y && \
-    # 必要なパッケージをインストール
-    apt-get install -y --no-install-recommends \
-        # フォント関連のライブラリ
-        libfontconfig1 libfreetype6 libfribidi0 \
-        # Zendriver 用に Google Chrome と日本語フォントをインストール
-        google-chrome-stable fonts-vlgothic && \
-    # 実行時イメージなので RUN の最後に掃除する
-    apt-get -y autoremove && \
-    apt-get -y clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    rm -rf /tmp/*
 
 # ダウンロードしておいたサードパーティーライブラリをコピー
 WORKDIR /code/server/
