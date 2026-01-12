@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends aria2 ca-certif
 # サードパーティーライブラリをダウンロード
 ## サードパーティーライブラリは変更が少ないので、先にダウンロード処理を実行してビルドキャッシュを効かせる
 WORKDIR /
-RUN aria2c -x10 https://nightly.link/shiminiku/konomi/actions/runs/20919555488/artifacts/5097622882/thirdparty-linux.tar.xz.zip
+RUN aria2c -x10 https://github.com/shiminiku/konomi/actions/runs/20919555488/artifacts/5097622882
 RUN unzip thirdparty-linux.tar.xz.zip && tar xvf thirdparty-linux.tar.xz
 
 # --------------------------------------------------------------------------------------------------------------
