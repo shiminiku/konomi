@@ -1,4 +1,4 @@
-# https://github.com/tsukumijima/KonomiTV/blob/63f8825d4accafc950922758e14f6f712eee0fad/Dockerfile
+# https://github.com/tsukumijima/KonomiTV/blob/v0.13.0/Dockerfile
 # --------------------------------------------------------------------------------------------------------------
 # サードパーティーライブラリのダウンロードを行うステージ
 # Docker のマルチステージビルドを使い、最終的な Docker イメージのサイズを抑え、ビルドキャッシュを効かせる
@@ -17,11 +17,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends aria2 ca-certif
 ## サードパーティーライブラリは変更が少ないので、先にダウンロード処理を実行してビルドキャッシュを効かせる
 WORKDIR /
 ## リリース版用
-# RUN aria2c -x10 https://github.com/tsukumijima/KonomiTV/releases/download/v0.12.0/thirdparty-linux.tar.xz
-# RUN tar xvf thirdparty-linux.tar.xz
+RUN aria2c -x10 https://github.com/tsukumijima/KonomiTV/releases/download/v0.13.0/thirdparty-linux.tar.xz
+RUN tar xvf thirdparty-linux.tar.xz
 ## 開発版 (0.xx.x-dev) 用
-RUN aria2c -x10 https://nightly.link/shiminiku/konomi/actions/runs/20882889079/thirdparty-linux.tar.xz.zip
-RUN unzip thirdparty-linux.tar.xz.zip && tar xvf thirdparty-linux.tar.xz
+# RUN aria2c -x10 https://nightly.link/tsukumijima/KonomiTV/actions/runs/20725734876/thirdparty-linux.tar.xz.zip
+# RUN unzip thirdparty-linux.tar.xz.zip && tar xvf thirdparty-linux.tar.xz
+
 # --------------------------------------------------------------------------------------------------------------
 # クライアントをビルドするステージ
 # クライアントのビルド成果物 (dist) は Git に含まれているが、万が一ビルドし忘れたりや開発ブランチでの利便性を考慮してビルドしておく
