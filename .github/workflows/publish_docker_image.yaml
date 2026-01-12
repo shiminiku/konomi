@@ -25,6 +25,7 @@ jobs:
         with:
           repository: "tsukumijima/KonomiTV"
           path: ups
+          ref: "v0.13.0"
 
       - name: Checkout Repository
         uses: actions/checkout@v4
