@@ -3,6 +3,11 @@ name: Publish Docker Image
 # 手動実行
 on:
   workflow_dispatch:
+    inputs:
+      tag:
+        required: true
+        type: string
+        default: "latest"
 
 env:
   REGISTRY: ghcr.io
@@ -18,7 +23,7 @@ jobs:
       - name: Checkout Upstream
         uses: actions/checkout@v4
         with:
-          repository: 'tsukumijima/KonomiTV'
+          repository: "tsukumijima/KonomiTV"
           path: ups
 
       - name: Checkout Repository
@@ -46,8 +51,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=ref,event=tag
+            type=raw,value=${{ inputs.tag }}
 
       # Docker イメージをビルドして公開
       - name: Build and Push Docker Image
