@@ -11,10 +11,10 @@ CUDA なし、ハードウェアエンコード なし
 docker pull ghcr.io/shiminiku/konomi:latest
 ```
 
-- v0.13.0
+- v0.13.0  
   標準リリース
-- v0.13.0-browserless
-  Twitter連携で使うブラウザを省いた
+- v0.13.0-browserless  
+  Twitter連携で使うブラウザを省いた容量削減版
 
 ## 自慢
 
