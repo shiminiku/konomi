@@ -5,6 +5,17 @@
 
 CUDA なし、ハードウェアエンコード なし
 
+## タグ
+
+```sh
+docker pull ghcr.io/shiminiku/konomi:latest
+```
+
+- v0.13.0
+  標準リリース
+- v0.13.0-browserless
+  Twitter連携で使うブラウザを省いた
+
 ## 自慢
 
 **1.85GB → 0.927GB (or 0.678GB in browserless)**
