@@ -7,7 +7,7 @@ CUDA なし、ハードウェアエンコード なし
 
 ## 自慢
 
-**1.85GB → 0.927GB or 0.678GB**
+**1.85GB → 0.927GB (or 0.678GB in browserless)**
 
 ```
 IMAGE                                          ID             DISK USAGE   CONTENT SIZE
