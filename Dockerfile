@@ -1,4 +1,4 @@
-# https://github.com/tsukumijima/KonomiTV/blob/v0.13.0/Dockerfile
+# https://github.com/tsukumijima/KonomiTV/blob/v0.14.1/Dockerfile
 # --------------------------------------------------------------------------------------------------------------
 # サードパーティーライブラリのダウンロードを行うステージ
 # Docker のマルチステージビルドを使い、最終的な Docker イメージのサイズを抑え、ビルドキャッシュを効かせる
@@ -14,9 +14,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends aria2 ca-certificates unzip xz-utils
 
 # サードパーティーライブラリをダウンロード
-## サードパーティーライブラリは変更が少ないので、先にダウンロード処理を実行してビルドキャッシュを効かせる
+## 更新するには、まず build_thirdparty.yaml を編集、実行
 WORKDIR /
-RUN aria2c -x10 https://nightly.link/shiminiku/konomi/actions/runs/20919555488/thirdparty-linux.tar.xz.zip
+RUN aria2c -x10 https://nightly.link/shiminiku/konomi/actions/runs/31376717326/thirdparty-linux.tar.xz.zip
 RUN unzip thirdparty-linux.tar.xz.zip && tar xvf thirdparty-linux.tar.xz
 
 # --------------------------------------------------------------------------------------------------------------
