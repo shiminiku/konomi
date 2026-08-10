@@ -52,29 +52,6 @@ ENV TZ=Asia/Tokyo
 # apt-get に対話的に設定を確認されないための設定
 ENV DEBIAN_FRONTEND=noninteractive
 
-# サードパーティーライブラリの依存パッケージをインストール
-## libfontconfig1, libfreetype6, libfribidi0: フォント関連のライブラリ (なぜ必要だったか忘れたが多分ないと動かない)
-## Zendriver: Twitter GraphQL API を叩くために必要な Google Chrome とサイズ小さめの日本語フォントをインストールする
-RUN apt-get update && \
-    # リポジトリ追加に必要な最低限のパッケージをインストール
-    apt-get install -y --no-install-recommends ca-certificates curl git gpg tzdata && \
-    # Google Chrome リポジトリ
-    curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --yes --dearmor --output /usr/share/keyrings/google-chrome-keyring.gpg && \
-    echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome-keyring.gpg] https://dl.google.com/linux/chrome/deb/ stable main' > /etc/apt/sources.list.d/google-chrome.list && \
-    # リポジトリを更新し、この時点で利用可能なパッケージをアップグレード
-    apt-get update && apt-get upgrade -y && \
-    # 必要なパッケージをインストール
-    apt-get install -y --no-install-recommends \
-        # フォント関連のライブラリ
-        libfontconfig1 libfreetype6 libfribidi0 \
-        # Zendriver 用に Google Chrome と日本語フォントをインストール
-        google-chrome-stable fonts-vlgothic && \
-    # 実行時イメージなので RUN の最後に掃除する
-    apt-get -y autoremove && \
-    apt-get -y clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    rm -rf /tmp/*
-
 # ダウンロードしておいたサードパーティーライブラリをコピー
 WORKDIR /code/server/
 COPY --from=thirdparty-downloader /thirdparty/ /code/server/thirdparty/
