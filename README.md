@@ -3,25 +3,30 @@
 
 エンコーダーは、ffmpeg のみ
 
-CUDA なし、ハードウェアエンコード なし
+CUDA なし、ハードウェアエンコード なし、`browserless`では Chrome なし
 
 ## タグ
 
 ```sh
-docker pull ghcr.io/shiminiku/konomi:latest
+docker pull ghcr.io/shiminiku/konomi:v0.14.1
 ```
 
-- v0.13.0  
+- `v0.14.1` `v0.13.0`  
   標準リリース
-- v0.13.0-browserless  
+- `v0.14.1-browserless` `v0.13.0-browserless`  
   Twitter連携で使うブラウザを省いた容量削減版
 
 ## 自慢
 
-**1.85GB → 0.927GB (or 0.678GB in browserless)**
+v0.14.1: **1.94GB → 0.954GB (or 0.674GB in browserless)**  
+v0.13.0: **1.85GB → 0.927GB (or 0.678GB in browserless)**
 
 ```
 IMAGE                                          ID             DISK USAGE   CONTENT SIZE
+ghcr.io/shiminiku/konomi:v0.14.1               9ab965d1952b       2.98GB          954MB
+ghcr.io/shiminiku/konomi:v0.14.1-browserless   d9871eda900c       1.99GB          674MB
+ghcr.io/tsukumijima/konomitv:v0.14.1           3c27362b49da       6.41GB         1.94GB
+
 ghcr.io/shiminiku/konomi:v0.13.0               5a3294197e1c       2.91GB          927MB
 ghcr.io/shiminiku/konomi:v0.13.0-browserless   c80ced738a1e       2.01GB          678MB
 ghcr.io/tsukumijima/konomitv:v0.13.0           23628a05adb0       6.05GB         1.85GB
