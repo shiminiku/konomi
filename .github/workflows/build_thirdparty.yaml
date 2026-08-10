@@ -7,41 +7,32 @@ on:
 env:
   # Python のバージョン (Python Standalone Builds のリリースを指定する)
   ## ref: https://github.com/indygreg/python-build-standalone/releases
-  PYTHON_TAG: '20251031'
-  PYTHON_MAJOR_VERSION: '3.11'
-  PYTHON_VERSION: '3.11.14'
+  PYTHON_TAG: "20260610"
+  PYTHON_MAJOR_VERSION: "3.11"
+  PYTHON_VERSION: "3.11.15"
   # Poetry のバージョン
-  POETRY_VERSION: '1.8.5'
+  POETRY_VERSION: "1.8.5"
   # FFmpeg のバージョン (FFmpeg-Builds のリリースを指定する)
   ## FFmpeg-Builds は毎月末のリリースが長期間保持されるため、基本毎月末のリリースを指定する
-  ## FFMPEG_HWENCC_* は QSVEncC・NVEncC・VCEEncC (for Ubuntu 20.04 LTS) が依存する FFmpeg のバージョンを示す
-  ## FFmpeg-Builds の最新リリースでは FFmpeg 4.4 系がビルドされなくなったため、FFMPEG_HWENCC_* は 4.4 系の最終ビルドで固定されている
-  ## (正確には Ubuntu 20.04 LTS で入る FFmpeg は 4.2 系だが、FFmpeg 4.x 系であれば ABI 互換性があるため 4.4 系でも動作する)
+  ## Linux 版の最新 HWEncC バイナリは libav* を静的リンクするようになり、FFmpeg 共有ライブラリの別途同梱は不要になった
   ## ref: https://github.com/BtbN/FFmpeg-Builds/releases
-  FFMPEG_TAG: 'autobuild-2025-10-31-13-40'
-  FFMPEG_MAJOR_VERSION: '7.1'
-  FFMPEG_VERSION: '7.1.2-7-g24c44c34dc'
-  FFMPEG_HWENCC_TAG: 'autobuild-2024-03-31-17-28'
-  FFMPEG_HWENCC_MAJOR_VERSION: '4.4'
-  FFMPEG_HWENCC_VERSION: '4.4.4-94-g5d07afd482'
-  # libmediainfo のバージョン
-  ## Windows 版の pymediainfo (ビルド済みの MediaInfo.dll が同梱されている) とバージョンを合わせる
-  ## ref: https://github.com/sbraz/pymediainfo/blob/v6.0.1/appveyor.yml#L6
-  LIBMEDIAINFO_VERSION: '22.09'
+  FFMPEG_TAG: "autobuild-2026-05-31-13-22"
+  FFMPEG_MAJOR_VERSION: "7.1"
+  FFMPEG_VERSION: "7.1.4-7-gadcf20da26"
   # Akebi HTTPS Server ビルド用の Golang のバージョン
-  GOLANG_VERSION: '1.23.8'
+  GOLANG_VERSION: "1.23.8"
   # ビルド対象の tsreadex・psisiarc・psisimux・Akebi のコミットハッシュ
-  TSREADEX_COMMIT_HASH: 'eddc8bca0de99627d3867259e7a6e777cbd3b3c6'
-  PSISIARC_COMMIT_HASH: '6593a0f63aedaaecfac7682b51e267874a8ec549'
-  PSISIMUX_COMMIT_HASH: '1a01a38886dc41bac81d547ba31fa9eef1bad46b'
-  AKEBI_COMMIT_HASH: 'be986980f7a560b4f74eefcfa2cd474f892f3bc7'
+  TSREADEX_COMMIT_HASH: "a82528ccb698fcd07b4da1bb2243e63d685c34a7"
+  PSISIARC_COMMIT_HASH: "6593a0f63aedaaecfac7682b51e267874a8ec549"
+  PSISIMUX_COMMIT_HASH: "18c3c020e51e16804340c834835e0cfd72c8b50d"
+  AKEBI_COMMIT_HASH: "be986980f7a560b4f74eefcfa2cd474f892f3bc7"
 
 # ジョブの定義
 jobs:
   # Linux 向けのサードパーティーライブラリのビルド
   build-linux:
     strategy:
-      fail-fast: false  # 一つのビルドが失敗しても他のビルドは継続する
+      fail-fast: false # 一つのビルドが失敗しても他のビルドは継続する
       matrix:
         include:
           # x64 アーキテクチャ向けのビルド設定
@@ -50,14 +41,17 @@ jobs:
             # x86_64_v2 にすると2008年以降の CPU に搭載されている SSE 命令が使える
             # ref: https://gregoryszorc.com/docs/python-build-standalone/main/running.html
             python_arch_name: x86_64_v2
-            artifact_suffix: ''
+            artifact_suffix: ""
           # arm64 アーキテクチャ向けのビルド設定
           - arch: arm64
             runner: ubuntu-22.04-arm
             python_arch_name: aarch64
-            artifact_suffix: '-arm'
+            artifact_suffix: "-arm"
     runs-on: ${{ matrix.runner }}
     steps:
+      # build_thirdparty.yaml から参照する script / patch を使うため、リポジトリをチェックアウト
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       # Docker Buildx のセットアップ
       - name: Set up Docker Buildx
@@ -153,11 +147,12 @@ jobs:
           chmod a+x ../thirdparty/Akebi/akebi-https-server.elf
           cp License.txt ../thirdparty/Akebi/
 
-      # FFmpeg・QSVEncC・NVEncC・VCEEncC のアーカイブのダウンロードと配置
+      # FFmpeg・QSVEncC・NVEncC・VCEEncC のアーカイブのダウンロードと配置 (x64 のみ)
       # ドライバさえ入っていればスタンドアローンで実行できるように構成を工夫している
       - name: Download and Deploy Encoder Archives (for x64)
         if: matrix.arch == 'amd64'
         run: |
+
           # p7zip-full と patchelf のインストール
           ## patchelf は ELF バイナリに埋め込まれている rpath (動的ライブラリの検索パス) を変更するツールで、
           ## QSV/NV/VCEEncC に rpath を追加するために使う
@@ -166,7 +161,7 @@ jobs:
           sudo apt-get install -y p7zip-full patchelf
 
           # FFmpeg のアーカイブのダウンロード
-          curl -LO https://github.com/BtbN/FFmpeg-Builds/releases/download/${{ env.FFMPEG_TAG }}/ffmpeg-n${{ env.FFMPEG_VERSION }}-linux64-gpl-shared-${{ env.FFMPEG_MAJOR_VERSION }}.tar.xz
+          curl -fSLO https://github.com/BtbN/FFmpeg-Builds/releases/download/${{ env.FFMPEG_TAG }}/ffmpeg-n${{ env.FFMPEG_VERSION }}-linux64-gpl-shared-${{ env.FFMPEG_MAJOR_VERSION }}.tar.xz
           tar xvf ffmpeg-n${{ env.FFMPEG_VERSION }}-linux64-gpl-shared-${{ env.FFMPEG_MAJOR_VERSION }}.tar.xz
           mkdir thirdparty/FFmpeg/
           cp ffmpeg-n${{ env.FFMPEG_VERSION }}-linux64-gpl-shared-${{ env.FFMPEG_MAJOR_VERSION }}/bin/* thirdparty/FFmpeg/
@@ -188,16 +183,16 @@ jobs:
           # NVEncC for startup check hack
           mkdir thirdparty/NVEncC/
           touch thirdparty/NVEncC/NVEncC.elf
-          
+
           # VCEEncC for startup check hack
           mkdir thirdparty/VCEEncC/
           touch thirdparty/VCEEncC/VCEEncC.elf
-          
-      # FFmpeg・rkmppenc のアーカイブのダウンロードと配置
+      # FFmpeg・rkmppenc のアーカイブのダウンロードと配置 (arm64 のみ)
       # ドライバさえ入っていればスタンドアローンで実行できるように構成を工夫している
       - name: Download and Deploy Encoder Archives (for arm64)
         if: matrix.arch == 'arm64'
         run: |
+
           # p7zip-full と patchelf のインストール
           ## patchelf は ELF バイナリに埋め込まれている rpath (動的ライブラリの検索パス) を変更するツールで、
           ## rkmppenc に rpath を追加するために使う
@@ -206,7 +201,7 @@ jobs:
           sudo apt-get install -y p7zip-full patchelf
 
           # FFmpeg のアーカイブのダウンロード
-          curl -LO https://github.com/BtbN/FFmpeg-Builds/releases/download/${{ env.FFMPEG_TAG }}/ffmpeg-n${{ env.FFMPEG_VERSION }}-linuxarm64-gpl-shared-${{ env.FFMPEG_MAJOR_VERSION }}.tar.xz
+          curl -fSLO https://github.com/BtbN/FFmpeg-Builds/releases/download/${{ env.FFMPEG_TAG }}/ffmpeg-n${{ env.FFMPEG_VERSION }}-linuxarm64-gpl-shared-${{ env.FFMPEG_MAJOR_VERSION }}.tar.xz
           tar xvf ffmpeg-n${{ env.FFMPEG_VERSION }}-linuxarm64-gpl-shared-${{ env.FFMPEG_MAJOR_VERSION }}.tar.xz
           mkdir thirdparty/FFmpeg/
           cp ffmpeg-n${{ env.FFMPEG_VERSION }}-linuxarm64-gpl-shared-${{ env.FFMPEG_MAJOR_VERSION }}/bin/* thirdparty/FFmpeg/
@@ -228,8 +223,9 @@ jobs:
       # Python Standalone Builds のダウンロードと poetry のインストール
       - name: Install Python Standalone Builds & pip & poetry
         run: |
+
           # Python 本体のダウンロード
-          curl -L -o python.tar.gz https://github.com/indygreg/python-build-standalone/releases/download/${{ env.PYTHON_TAG }}/cpython-${{ env.PYTHON_VERSION }}+${{ env.PYTHON_TAG }}-${{ matrix.python_arch_name }}-unknown-linux-gnu-install_only_stripped.tar.gz
+          curl -fSL -o python.tar.gz https://github.com/indygreg/python-build-standalone/releases/download/${{ env.PYTHON_TAG }}/cpython-${{ env.PYTHON_VERSION }}+${{ env.PYTHON_TAG }}-${{ matrix.python_arch_name }}-unknown-linux-gnu-install_only_stripped.tar.gz
           tar xvf python.tar.gz
           mv python/ thirdparty/Python/
 
